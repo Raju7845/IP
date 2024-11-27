@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrieve User Information</title>
+</head>
+<body>
+    <h1>User Information</h1>
+    <label for="userId">Enter User ID (1-10):</label>
+    <input type="number" id="userId" min="1" max="10">
+    <button onclick="retrieveUser()">Get User Info</button>
+
+    <h2>Result:</h2>
+    <div id="result"></div>
+
+    <script>
+        function retrieveUser() {
+            const userId = document.getElementById("userId").value;
+            if (userId < 1 || userId > 10 || isNaN(userId)) {
+                document.getElementById("result").innerHTML = "Invalid ID. Enter a number between 1 and 10.";
+                return;
+            }
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", "users.xml", true);
+            xhr.onload = function () {
+                if (this.status === 200) {
+                    const xml = this.responseXML;
+                    const users = xml.getElementsByTagName("user");
+                    let found = false;
+
+                    for (let user of users) {
+                        const id = user.getElementsByTagName("id")[0].textContent;
+                        if (id == userId) {
+                            const name = user.getElementsByTagName("name")[0].textContent;
+                            const email = user.getElementsByTagName("email")[0].textContent;
+                            document.getElementById("result").innerHTML = `
+                                <p>ID: ${id}</p>
+                                <p>Name: ${name}</p>
+                                <p>Email: ${email}</p>
+                            `;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        document.getElementById("result").innerHTML = "User not found.";
+                    }
+                } else {
+                    document.getElementById("result").innerHTML = "Error loading XML file.";
+                }
+            };
+            xhr.send();
+        }
+    </script>
+</body>
+</html>
